@@ -14,25 +14,48 @@ def deleteStudent(id: str, students: list, notes: list) -> bool:
     return True
 
 
-def getStudentMaxGrade(id: str, students: list, notes):
+
+
+def getStudentMaxGrade(id: str, students: list, notes: list, courses: list):
     """Retorna la nota y el código del curso en el cual ha obtenido
     su mayor nota un estudiante dado."""
 
-    indexStudent = students.index(id) 
+    if id not in students:
+        return None
+ 
+    indexStudent = students.index(id) # Ubicamos el indice del estudiante
 
     # Ubicamos las notas correspondientes a el estudiante y dentro de esas notas buscamos la mas alta y ubicamos su indice
 
+    notesStudent = notes[indexStudent] # < contiene las notas del estudiante
 
-    notesStudent = notes[indexStudent]
+    # Agrupamos las notas por curso
+    notesByCourse = []
 
-    #Buscamos el numero mas alto en la lista
+    for i in range(len(notesStudent)):
+        note = notesStudent[i]
+        course = courses[i]
 
-    count = 0
-    for note in notes:
-        if note > count:
-            count = note
+        notesByCourse.append((note, course)) # < tupla con la nota y el curso
+
+    # Validamos que la lista no este vacia
+    if not notesByCourse:
+        return None
+
+    notesByCourse.sort()
+
+    maxNote = notesByCourse[-1]
+    maxNoteCourse = maxNote[1]
+
+    print(maxNote)
+    print(maxNoteCourse)
+
+    return maxNote, maxNoteCourse
+
+
+def sortStudentsByAverage(students: list, notes: list):
+
+
     
-    print(count) # Debe de imprimir la nota mayor
-
 
     pass

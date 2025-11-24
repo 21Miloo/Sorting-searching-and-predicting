@@ -12,9 +12,7 @@ def loadData(file) -> str:
     
 
 info = loadData('data/notas_estudiantes.csv')    
-
-
-
+historyEnrollment = loadData('data/hist_matriculados.csv')
 
 def organizeInfoStudent(data) -> list:
 
@@ -24,20 +22,63 @@ def organizeInfoStudent(data) -> list:
     students = lines[1].split(',')
 
     print(courses)
+    print('--------------------------------')
     print(students)
+    print('--------------------------------')
 
     noteList = []
 
-    count = 2 # Empieza desde 2 ya que la notas se encuentran a partir de la 2da posicion
-
     for line in lines[2:]:
-      note = line.split(',')
-      noteList.append(note)
-      count += 1
+        
+        if not line.strip():
+            continue
+        
+        notesStr = line.split(',') # < contiene las notas de un estudiante 
+        print(notesStr)
 
+        studentsNotes = []
+
+        for value in notesStr:
+            studentsNotes.append(float(value))
+
+        noteList.append(studentsNotes)
+
+    print('--------------------------------')
     print(noteList)
 
     return courses, students, noteList
 
 
-organizeInfoStudent(info)
+
+# organizeInfoStudent(info)
+
+
+#Abrir el archivo hist_matriculados.csv y cargar los datos en dos listas
+
+def organizeHistoryEnrollment(data) -> list:
+
+    '''Permite leer el archivo hist_matriculados.csv y cargar las
+        estructuras de datos del programa.'''
+
+    lines = data.split('\n')
+
+    # print(lines)
+
+    years = []
+    students = []
+
+    for line in lines[1:]:
+        if not line.strip():
+            continue
+
+        value = line.split(',')
+        years.append(int(value[0]))
+        students.append(int(value[1]))
+
+    print(years, '\n')
+    print(students, '\n')
+
+    return years, students
+
+
+organizeHistoryEnrollment(historyEnrollment)
