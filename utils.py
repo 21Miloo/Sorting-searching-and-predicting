@@ -1,39 +1,37 @@
-
 def loadData(file) -> str:
+    """Permite leer el archivo database.csv y cargar las
+    estructuras de datos del programa."""
 
-    '''Permite leer el archivo database.csv y cargar las
-        estructuras de datos del programa.'''
-    
-    with open(file, 'r') as f:
+    with open(file, "r") as f:
         data = f.read()
 
-
     return data
-    
 
-info = loadData('data/notas_estudiantes.csv')    
-historyEnrollment = loadData('data/hist_matriculados.csv')
+
+info = loadData("data/notas_estudiantes.csv")
+historyEnrollment = loadData("data/hist_matriculados.csv")
+
 
 def organizeInfoStudent(data) -> list:
 
-    lines = data.split('\n')
+    lines = data.split("\n")
 
-    courses = lines[0].split(',')
-    students = lines[1].split(',')
+    courses = lines[0].split(",")
+    students = lines[1].split(",")
 
     print(courses)
-    print('--------------------------------')
+    print("--------------------------------")
     print(students)
-    print('--------------------------------')
+    print("--------------------------------")
 
     noteList = []
 
     for line in lines[2:]:
-        
+
         if not line.strip():
             continue
-        
-        notesStr = line.split(',') # < contiene las notas de un estudiante 
+
+        notesStr = line.split(",")  # < contiene las notas de un estudiante
         print(notesStr)
 
         studentsNotes = []
@@ -43,24 +41,23 @@ def organizeInfoStudent(data) -> list:
 
         noteList.append(studentsNotes)
 
-    print('--------------------------------')
+    print("--------------------------------")
     print(noteList)
 
     return courses, students, noteList
 
 
+organizeInfoStudent(info)
 
-# organizeInfoStudent(info)
 
+# Abrir el archivo hist_matriculados.csv y cargar los datos en dos listas
 
-#Abrir el archivo hist_matriculados.csv y cargar los datos en dos listas
 
 def organizeHistoryEnrollment(data) -> list:
+    """Permite leer el archivo hist_matriculados.csv y cargar las
+    estructuras de datos del programa."""
 
-    '''Permite leer el archivo hist_matriculados.csv y cargar las
-        estructuras de datos del programa.'''
-
-    lines = data.split('\n')
+    lines = data.split("\n")
 
     # print(lines)
 
@@ -71,14 +68,14 @@ def organizeHistoryEnrollment(data) -> list:
         if not line.strip():
             continue
 
-        value = line.split(',')
+        value = line.split(",")
         years.append(int(value[0]))
         students.append(int(value[1]))
 
-    print(years, '\n')
-    print(students, '\n')
+    print(years, "\n")
+    print(students, "\n")
 
     return years, students
 
 
-organizeHistoryEnrollment(historyEnrollment)
+# organizeHistoryEnrollment(historyEnrollment)
