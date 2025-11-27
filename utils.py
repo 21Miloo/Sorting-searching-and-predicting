@@ -8,8 +8,8 @@ def loadData(file) -> str:
     return data
 
 
-info = loadData("data/notas_estudiantes.csv")
-historyEnrollment = loadData("data/hist_matriculados.csv")
+# info = loadData("data/notas_estudiantes.csv")
+# historyEnrollment = loadData("data/hist_matriculados.csv")
 
 
 def organizeInfoStudent(data) -> list:
@@ -47,7 +47,7 @@ def organizeInfoStudent(data) -> list:
     return courses, students, noteList
 
 
-organizeInfoStudent(info)
+# organizeInfoStudent(info)
 
 
 # Abrir el archivo hist_matriculados.csv y cargar los datos en dos listas
