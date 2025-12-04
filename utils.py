@@ -20,9 +20,7 @@ def organizeInfoStudent(data) -> list:
     students = lines[1].split(",")
 
     print(courses)
-    print("--------------------------------")
     print(students)
-    print("--------------------------------")
 
     noteList = []
 
@@ -32,7 +30,7 @@ def organizeInfoStudent(data) -> list:
             continue
 
         notesStr = line.split(",")  # < contiene las notas de un estudiante
-        print(notesStr)
+        #print(notesStr)
 
         studentsNotes = []
 
@@ -41,8 +39,8 @@ def organizeInfoStudent(data) -> list:
 
         noteList.append(studentsNotes)
 
-    print("--------------------------------")
-    print(noteList)
+    #print("--------------------------------")
+    #print(noteList)
 
     return courses, students, noteList
 
@@ -72,8 +70,8 @@ def organizeHistoryEnrollment(data) -> list:
         years.append(int(value[0]))
         students.append(int(value[1]))
 
-    print(years, "\n")
-    print(students, "\n")
+    # print(years, "\n")
+    # print(students, "\n")
 
     return years, students
 

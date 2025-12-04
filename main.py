@@ -1,7 +1,7 @@
 # comando pip install matplotlib
 from utils import organizeInfoStudent, organizeHistoryEnrollment, loadData
 from student_data_utils import deleteStudent, getStudentMaxGrade, sortStudentsByAverage, sortByNumberOfCourses
-from linear_regression import predictFutureStudents
+from linear_regression import predictStudents
 
 
 
@@ -40,9 +40,8 @@ while True:
         sortByNumberOfCourses(students, notes)
 
     elif option == '5':
-        a = float(input("Ingrese valor de a: "))
-        b = float(input("Ingrese valor de b: "))
-        predictFutureStudents(yearsHistory, studentsHistory, a, b)
+        yearToPredict = int(input("Ingrese el año para predecir la matrícula: "))
+        predictStudents(yearsHistory, studentsHistory, yearToPredict)
 
     elif option == '6':
         print("Saliendo...")
