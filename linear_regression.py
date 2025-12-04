@@ -1,95 +1,136 @@
+import matplotlib
+import os
+import subprocess
+
+# Intentar seleccionar un backend GUI disponible en macOS.
+# Debe hacerse antes de importar `pyplot`, pero si ya hay un backend
+# establecido por la variable de entorno, intentamos no romperlo.
+for _backend in ("macosx", "TkAgg", "Qt5Agg"):
+    try:
+        matplotlib.use(_backend)
+        break
+    except Exception:
+        # si no está disponible, intentamos el siguiente
+        continue
+
 import matplotlib.pyplot as plt
-from plots import plot_data
-
-# A representa la pendiente de la recta (representa el cambio anual en estudiantes. En la práctica, suele estar entre –50 y +50)
-# B representa la intersección con el eje Y ( número de estudiantes cuando X=0 puede ser * un número muy grande * un número negativo *un valor que no tiene sentido interpretativo)
-
-X = 0  # Año
-
-Y = 0  # Cantidad de estudiantes matriculados
-
-# Ecuacion lineal:
-#
-# Y = aX + b
-
-# Pedir año al usuario
-# # Retornar cantidad de estudiantes que estima estarán matriculados ese año así como el
-# error del modelo. También deberá generar un archivo que contenga una gráfica cómo la
-# mostrada en esta guía, donde aparezcan los datos históricos, la regresión lineal y el punto
-# específico que fue estimado de acuerdo a la solicitud del usuario.
 
 
-def linearRegressionPredict(years: list, a: float, b: float):
-    """Calcula los valores estimados de estudiantes matriculados para cada año en la lista de años"""
+def predictStudents(years: list, students: list, yearToPredict: int):
+    """
+    Predice estudiantes usando rectas por tramos (como pidió el profesor),
+    calcula el MAE, y genera la gráfica con:
+        - Datos reales
+        - Rectas por tramos
+        - Punto predicho
+    """
 
-    estimatedStudents = []
+    # -----------------------------
+    # 1. ORDENAR LOS DATOS
+    # -----------------------------
+    data = sorted(zip(years, students), key=lambda x: x[0])
+    years_sorted = [d[0] for d in data]
+    students_sorted = [d[1] for d in data]
 
-    for year in years:
+    # -----------------------------
+    # 2. FUNCIÓN AUXILIAR: obtener predicción por segmento
+    # -----------------------------
+    def predict_from_segments(x):
+        # Si x está antes del primer punto → extrapolar
+        if x <= years_sorted[0]:
+            x1, y1 = years_sorted[0], students_sorted[0]
+            x2, y2 = years_sorted[1], students_sorted[1]
 
-        y = (a * year) + b
+        # Si x está después del último punto
+        elif x >= years_sorted[-1]:
+            x1, y1 = years_sorted[-2], students_sorted[-2]
+            x2, y2 = years_sorted[-1], students_sorted[-1]
 
-        estimatedStudents.append(y)
+        # Si x está en medio → buscar el tramo correspondiente
+        else:
+            for i in range(len(years_sorted) - 1):
+                x1, x2 = years_sorted[i], years_sorted[i+1]
+                if x1 <= x <= x2:
+                    y1 = students_sorted[i]
+                    y2 = students_sorted[i+1]
+                    break
 
-    return estimatedStudents
+        # calcular pendiente y recta
+        m = (y2 - y1) / (x2 - x1)
+        b = y1 - m * x1
 
+        return m * x + b
 
-def calculateMAE(students: list, estimatedStudents: list):
-    """Calcula el Error Absoluto Medio (MAE) entre los valores reales y los estimados."""
+    # -----------------------------
+    # 3. CALCULAR MAE
+    # -----------------------------
+    predicted_all = [predict_from_segments(x) for x in years_sorted]
 
-    totalError = 0
+    mae = sum(abs(students_sorted[i] - predicted_all[i]) for i in range(len(years_sorted)))
+    mae /= len(years_sorted)
 
-    for i in range(len(students)):
+    # -----------------------------
+    # 4. PREDICCIÓN FINAL
+    # -----------------------------
+    predicted_year = predict_from_segments(yearToPredict)
 
-        error = abs(students[i] - estimatedStudents[i])
+    # -----------------------------
+    # 5. GRAFICAR
+    # -----------------------------
+    plt.figure(figsize=(12, 6))
 
-        totalError += error
+    # Datos reales
+    plt.scatter(years_sorted, students_sorted, color="blue", label="Datos reales")
 
-    mae = totalError / len(students)
+    # Dibujar rectas por tramos
+    for i in range(len(years_sorted)-1):
+        x1, x2 = years_sorted[i], years_sorted[i+1]
+        y1, y2 = students_sorted[i], students_sorted[i+1]
 
-    return mae
+        # pendiente y recta
+        m = (y2 - y1) / (x2 - x1)
+        b = y1 - m * x1
 
+        xs = [x1, x2]
+        ys = [m*x1 + b, m*x2 + b]
 
-def pedrictOneYear(year: int, students: list, a: float, b: float):
-    """Predice la cantidad de estudiantes para un único año futuro."""
+        plt.plot(xs, ys, color="orange")
 
-    # Calcular el valor estimado para el año futuro
-    estimatedStudents = (a * year) + b
+    # Punto predicho
+    plt.scatter(yearToPredict, predicted_year, color="green", s=120, label=f"Predicción {yearToPredict}")
 
-    return estimatedStudents
+    plt.title("Modelo de predicción por tramos lineales")
+    plt.xlabel("Año")
+    plt.ylabel("Estudiantes matriculados")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    # Guardar una copia de la figura para diagnóstico
+    try:
+        plt.savefig('last_prediction.png')
+    except Exception:
+        pass
 
+    # Intentar mostrar la ventana con bloqueo. Si el backend es no-interactivo
+    # (por ejemplo 'Agg') o `plt.show()` falla, abrir la imagen guardada con el
+    # visor por defecto de macOS para garantizar que el usuario vea la gráfica.
+    backend = matplotlib.get_backend().lower()
+    try:
+        if 'agg' in backend:
+            # backend no interactivo: abrir la imagen guardada
+            if os.path.exists('last_prediction.png'):
+                subprocess.run(['open', 'last_prediction.png'])
+        else:
+            plt.show(block=True)
+    except Exception:
+        if os.path.exists('last_prediction.png'):
+            try:
+                subprocess.run(['open', 'last_prediction.png'])
+            except Exception:
+                # último recurso: imprimir ruta al archivo
+                print('Gráfica guardada en:', os.path.abspath('last_prediction.png'))
 
-def predictFutureStudents(years: list, students: list, a: float, b: float):
-
-    # 1. Calcular valores estimados para todos los años históricos
-    estimatedStudents = linearRegressionPredict(years, a, b)
-
-    # 2. Calcular el MAE del modelo
-    mae = calculateMAE(students, estimatedStudents)
-
-    # 3. Pedir año futuro
-    futureYear = int(input("Ingrese un año futuro para predecir: "))
-
-    # 4. Calcular la predicción para ese año
-    futurePrediction = pedrictOneYear(futureYear, students, a, b)
-
-    print("\n-------------------------------------")
-    print("Año futuro:", futureYear)
-    print("Estudiantes estimados:", futurePrediction)
-    print("Error MAE del modelo:", mae)
-    print("-------------------------------------\n")
-
-    # 5. Preparar datos para pasarlos a la funcion de graficar
-    data = []
-    for i in range(len(years)):
-        data.append([years[i], students[i]])
-
-    # Graficamos los datos históricos y la regresión
-    plot_data(data, estimatedStudents, years)
-
-    # Dibujamos EL PUNTO FUTURO ENCIMA DE LA GRÁFICA
-    plt.plot(
-        futureYear, futurePrediction, "go", markersize=12
-    )  # punto específico que fue estimado de acuerdo a la solicitud del usuario (go: green y circulo, markersize: tamaño del punto)
-    plt.show()
-
-    return estimatedStudents, mae, futureYear, futurePrediction
+    # -----------------------------
+    # 6. RETORNAR VALORES
+    # -----------------------------
+    return predicted_year, mae
